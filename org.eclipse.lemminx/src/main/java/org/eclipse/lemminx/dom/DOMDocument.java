@@ -945,4 +945,9 @@ public class DOMDocument extends DOMNode implements Document {
 			cancelChecker.checkCanceled();
 		}
 	}
+
+	public static DOMDocument create(String uri, String xml, Object object) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'create'");
+	}
 }

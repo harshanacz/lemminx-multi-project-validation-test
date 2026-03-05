@@ -43,7 +43,7 @@ public class DOMParser {
 		return INSTANCE;
 	}
 
-	private DOMParser() {
+	public DOMParser() {
 
 	}
 
