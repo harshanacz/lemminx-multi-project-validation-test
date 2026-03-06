@@ -24,56 +24,63 @@ public class MultiProjectValidationTest {
 
         validate("../test-workspace/projectA/test.xml");
         validate("../test-workspace/projectB/test.xml");
-    }
-
-    private static void setupXMLSettings() {
-        // Explictly initialize ContentModelPlugin for standalone testing
-        org.eclipse.lemminx.extensions.contentmodel.ContentModelPlugin cmPlugin = new org.eclipse.lemminx.extensions.contentmodel.ContentModelPlugin();
         
-        // XMLLanguageService itself is the XMLExtensionsRegistry
-        cmPlugin.start(new org.eclipse.lsp4j.InitializeParams(), xmlService);
+        System.out.println("\n============== DYNAMIC SCHEMA SWAP ==============");
+        System.out.println("Changing Project A to use schemaB.xsd instead of schemaA.xsd dynamically...\n");
         
-        // Fetch ContentModelManager to inject XML associations (similar to configuring XML catalogs via settings in MI LS)
         ContentModelManager contentModelManager = xmlService.getComponent(ContentModelManager.class);
         
-        // Map Project A test.xml to schemaA.xsd
         XMLFileAssociation formatA = new XMLFileAssociation();
         formatA.setPattern("**/projectA/test.xml");
-        formatA.setSystemId("../test-workspace/projectA/schemaA.xsd");
+        // Using schema B for Project A now!
+        formatA.setSystemId("../test-workspace/projectB/schemaB.xsd");
         
-        // Map Project B test.xml to schemaB.xsd
         XMLFileAssociation formatB = new XMLFileAssociation();
         formatB.setPattern("**/projectB/test.xml");
         formatB.setSystemId("../test-workspace/projectB/schemaB.xsd");
         
-        // Update the XML engine with these settings
+        // Push the new configuration down to LemMinX instantly
+        contentModelManager.setFileAssociations(new XMLFileAssociation[]{formatA, formatB});
+        
+        // Re-validate same file, we should now see an error because schemaB doesn't know about <projectA>
+        validate("../test-workspace/projectA/test.xml");
+    }
+
+    private static void setupXMLSettings() {
+        org.eclipse.lemminx.extensions.contentmodel.ContentModelPlugin cmPlugin = new org.eclipse.lemminx.extensions.contentmodel.ContentModelPlugin();
+        cmPlugin.start(new org.eclipse.lsp4j.InitializeParams(), xmlService);
+        
+        ContentModelManager contentModelManager = xmlService.getComponent(ContentModelManager.class);
+        
+        XMLFileAssociation formatA = new XMLFileAssociation();
+        formatA.setPattern("**/*projectA*test.xml");
+        formatA.setSystemId(Paths.get("../test-workspace/projectA/schemaA.xsd").toAbsolutePath().toUri().toString());
+        
+        XMLFileAssociation formatB = new XMLFileAssociation();
+        formatB.setPattern("**/*projectB*test.xml");
+        formatB.setSystemId(Paths.get("../test-workspace/projectB/schemaB.xsd").toAbsolutePath().toUri().toString());
+        
         contentModelManager.setFileAssociations(new XMLFileAssociation[]{formatA, formatB});
     }
 
     static void validate(String path) throws Exception {
 
         System.out.println("Validating: " + path);
+        
+        String xml = new String(Files.readAllBytes(Paths.get(path)), java.nio.charset.StandardCharsets.UTF_8);
+        xml = xml.trim(); // strip leading whitespaces that ruin prolog
 
-        // Read XML file
-        String xml = new String(Files.readAllBytes(Paths.get(path)));
-        System.out.println("XML Length: " + xml.length());
-        System.out.println("Content: [" + xml + "]");
+        String uri = Paths.get(path).toAbsolutePath().toUri().toString();
 
-        // Create proper URI for pattern matching in LemMinX
-        String uri = "file:///" + (path.contains("projectA") ? "projectA" : "projectB") + "/test.xml";
-
-        // Parse XML using LemMinX parser
         DOMDocument document = DOMParser.getInstance().parse(uri, xml, null);
 
-        // Run validation using XMLLanguageService
         List<Diagnostic> diagnostics = xmlService.doDiagnostics(
                 document,
                 null,
                 null,
-                () -> {} // CancelChecker (empty implementation)
+                () -> {}
         );
 
-        // Print results
         System.out.println("Diagnostics: " + diagnostics);
         System.out.println("-----------------------------\n");
     }
