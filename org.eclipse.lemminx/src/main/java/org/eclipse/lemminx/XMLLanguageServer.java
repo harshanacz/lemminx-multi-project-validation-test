@@ -110,6 +110,7 @@ public class XMLLanguageServer implements ProcessLanguageServer, XMLLanguageServ
 	}
 
 	@Override
+	//harshanaa
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
 		Object initOptions = InitializationOptionsSettings.getSettings(params);
 		Object xmlSettings = AllXMLSettings.getAllXMLSettings(initOptions);
