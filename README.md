@@ -1,4 +1,4 @@
-XML Language Server (LemMinX)
+XML Language Server (LemMinX) Fork - Experiment to verify whether a single LemMinX XMLLanguageService instance can validate XML documents from multiple project roots using different schemas.
 ===========================
 [![Maven](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Frepo.eclipse.org%2Fcontent%2Frepositories%2Flemminx-releases%2Forg%2Feclipse%2Flemminx%2Forg.eclipse.lemminx%2Fmaven-metadata.xml&style=for-the-badge&logo=apachemaven&logoColor=white&color=informational)](https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/)
 [![Eclipse Site](https://img.shields.io/badge/Eclipse%20Site-lemminx-informational?logo=eclipse&style=for-the-badge)](https://download.eclipse.org/lemminx/releases/)
