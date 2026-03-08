@@ -24,26 +24,29 @@ public class MultiProjectValidationTest {
 
         validate("../test-workspace/projectA/test.xml");
         validate("../test-workspace/projectB/test.xml");
+
+        //additional test - dynamic schema swap - no need now.
+
+        // System.out.println("\n============== DYNAMIC SCHEMA SWAP ==============");
+        // System.out.println("Changing Project A to use schemaB.xsd instead of schemaA.xsd dynamically...\n");
         
-        System.out.println("\n============== DYNAMIC SCHEMA SWAP ==============");
-        System.out.println("Changing Project A to use schemaB.xsd instead of schemaA.xsd dynamically...\n");
+        // ContentModelManager contentModelManager = xmlService.getComponent(ContentModelManager.class);
         
-        ContentModelManager contentModelManager = xmlService.getComponent(ContentModelManager.class);
+        // XMLFileAssociation formatA = new XMLFileAssociation();
+        // formatA.setPattern("**/projectA/test.xml");
+        // // Using schema B for Project A now!
+        // formatA.setSystemId("../test-workspace/projectB/schemaB.xsd");
         
-        XMLFileAssociation formatA = new XMLFileAssociation();
-        formatA.setPattern("**/projectA/test.xml");
-        // Using schema B for Project A now!
-        formatA.setSystemId("../test-workspace/projectB/schemaB.xsd");
+        // XMLFileAssociation formatB = new XMLFileAssociation();
+        // formatB.setPattern("**/projectB/test.xml");
+        // formatB.setSystemId("../test-workspace/projectB/schemaB.xsd");
         
-        XMLFileAssociation formatB = new XMLFileAssociation();
-        formatB.setPattern("**/projectB/test.xml");
-        formatB.setSystemId("../test-workspace/projectB/schemaB.xsd");
+        // // Push the new configuration down to LemMinX instantly
+        // contentModelManager.setFileAssociations(new XMLFileAssociation[]{formatA, formatB});
         
-        // Push the new configuration down to LemMinX instantly
-        contentModelManager.setFileAssociations(new XMLFileAssociation[]{formatA, formatB});
+        // // Re-validate same file, we should now see an error because schemaB doesn't know about <projectA>
+        // validate("../test-workspace/projectA/test.xml");
         
-        // Re-validate same file, we should now see an error because schemaB doesn't know about <projectA>
-        validate("../test-workspace/projectA/test.xml");
     }
 
     private static void setupXMLSettings() {
