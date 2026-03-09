@@ -28,28 +28,40 @@ public class MultiProjectValidationTest {
         System.out.println("\n--- Testing nested subfolder file ---");
         validate("../test-workspace/projectA/api/apitest.xml");
 
-        //additional test - dynamic schema swap - no need now.
+        System.out.println("\n============== DYNAMIC CONTENT UPDATE (Adding a Connector) ==============");
+        System.out.println("Simulating user adding a new connector (e.g. Salesforce). Updating childA.xsd content...\n");
+        
+        // 1. Write new content to the schema file (simulate adding salesforceConnector tag to MI 4.3.0 schema)
+        String newChildSchema = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                "  <xs:element name=\"childComponentA\" type=\"xs:string\"/>\n" +
+                "  <xs:element name=\"salesforceConnector\" type=\"xs:string\"/>\n" + 
+                "</xs:schema>";
+        Files.write(Paths.get("../test-workspace/projectA/childA.xsd"), newChildSchema.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
-        // System.out.println("\n============== DYNAMIC SCHEMA SWAP ==============");
-        // System.out.println("Changing Project A to use schemaB.xsd instead of schemaA.xsd dynamically...\n");
+        // 2. Write new XML file that uses this new tag
+        String newTestXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<projectA>\n" +
+                "    <childComponentA>API test is working!</childComponentA>\n" +
+                "    <salesforceConnector>Connected via Salesforce!</salesforceConnector>\n" +
+                "</projectA>";
+        Files.write(Paths.get("../test-workspace/projectA/api/apitest.xml"), newTestXml.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         
-        // ContentModelManager contentModelManager = xmlService.getComponent(ContentModelManager.class);
+        // 3. Clear cache / Re-apply associations so LemMinX rebuilds its grammar memory
+        ContentModelManager contentModelManager = xmlService.getComponent(ContentModelManager.class);
+        XMLFileAssociation formatA = new XMLFileAssociation();
+        formatA.setPattern("**/projectA/**/*.xml");
+        formatA.setSystemId(Paths.get("../test-workspace/projectA/schemaA.xsd").toAbsolutePath().toUri().toString());
         
-        // XMLFileAssociation formatA = new XMLFileAssociation();
-        // formatA.setPattern("**/projectA/test.xml");
-        // // Using schema B for Project A now!
-        // formatA.setSystemId("../test-workspace/projectB/schemaB.xsd");
+        XMLFileAssociation formatB = new XMLFileAssociation();
+        formatB.setPattern("**/projectB/**/*.xml");
+        formatB.setSystemId(Paths.get("../test-workspace/projectB/schemaB.xsd").toAbsolutePath().toUri().toString());
         
-        // XMLFileAssociation formatB = new XMLFileAssociation();
-        // formatB.setPattern("**/projectB/test.xml");
-        // formatB.setSystemId("../test-workspace/projectB/schemaB.xsd");
+        contentModelManager.setFileAssociations(new XMLFileAssociation[]{formatA, formatB});
         
-        // // Push the new configuration down to LemMinX instantly
-        // contentModelManager.setFileAssociations(new XMLFileAssociation[]{formatA, formatB});
-        
-        // // Re-validate same file, we should now see an error because schemaB doesn't know about <projectA>
-        // validate("../test-workspace/projectA/test.xml");
-        
+        // 4. Validate again! It should be completely valid (no errors about salesforceConnector)
+        System.out.println("Validating after content update...");
+        validate("../test-workspace/projectA/api/apitest.xml");
     }
 
     private static void setupXMLSettings() {
