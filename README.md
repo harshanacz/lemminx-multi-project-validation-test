@@ -23,22 +23,3 @@ Navigate to the `org.eclipse.lemminx` directory and run the following Maven comm
 cd org.eclipse.lemminx
 mvn clean compile exec:java -Dexec.mainClass="org.eclipse.lemminx.MultiProjectValidationTest" -q
 ```
-
-//dont remove ---
-my note
-
-I successfully completed the standalone PoC for multi-root schema validation. Here’s a quick summary of how it works:
-
-Instead of using XML Catalogs (which maps via namespace and causes conflicts when multiple MI versions are open), I used XMLFileAssociation inside 
-
-ContentModelManager
-. This maps different schemas strictly based on the file path pattern (e.g., **/projectA/**/*.xml -> MI 4.1.0 schema).
-
-I used a single 
-
-XMLLanguageService
- instance to validate files from two different projects simultaneously. Both files mapped correctly to their isolated schemas based purely on the path pattern without any inline schema definitions inside the XMLs.
-
-Also, it handles nested schemas perfectly. I only passed the root schema path (
-synapse_config.xsd
- equivalent), and the underlying parser automatically resolved all <xs:include> schemas relative to the root file. This proves we can robustly support multi-root validation in the MI Language Server using this architecture.
