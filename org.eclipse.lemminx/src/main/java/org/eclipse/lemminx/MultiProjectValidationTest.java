@@ -24,6 +24,9 @@ public class MultiProjectValidationTest {
 
         validate("../test-workspace/projectA/test.xml");
         validate("../test-workspace/projectB/test.xml");
+        
+        System.out.println("\n--- Testing nested subfolder file ---");
+        validate("../test-workspace/projectA/api/apitest.xml");
 
         //additional test - dynamic schema swap - no need now.
 
@@ -56,11 +59,11 @@ public class MultiProjectValidationTest {
         ContentModelManager contentModelManager = xmlService.getComponent(ContentModelManager.class);
         
         XMLFileAssociation formatA = new XMLFileAssociation();
-        formatA.setPattern("**/*projectA*test.xml");
+        formatA.setPattern("**/projectA/**/*.xml");
         formatA.setSystemId(Paths.get("../test-workspace/projectA/schemaA.xsd").toAbsolutePath().toUri().toString());
         
         XMLFileAssociation formatB = new XMLFileAssociation();
-        formatB.setPattern("**/*projectB*test.xml");
+        formatB.setPattern("**/projectB/**/*.xml");
         formatB.setSystemId(Paths.get("../test-workspace/projectB/schemaB.xsd").toAbsolutePath().toUri().toString());
         
         contentModelManager.setFileAssociations(new XMLFileAssociation[]{formatA, formatB});
